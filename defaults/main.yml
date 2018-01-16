@@ -1,0 +1,9 @@
+---
+couchbase_version: 4.6.4
+couchbase_edition: enterprise
+couchbase_path: /var/lib/couchbase/
+couchbase_index_path: var/lib/couchbase/index
+couchbase_port: 8091
+couchbase_services:
+    - kv
+couchbase_ufw_rule: allow

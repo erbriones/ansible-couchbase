@@ -1,0 +1,58 @@
+---
+- name: Ensure all nodes are part of the Couchbase group
+  fail: msg="Expected host to be part of the Couchbase group"
+  when: "'couchbase' not in group_names"
+
+- name: Set the Couchbase download path
+  set_fact:
+    couchbase_executable: "/tmp/couchbase-server-{{ couchbase_edition }}-{{ couchbase_version }}.rpm"
+
+- name: Fetch the Couchbase MD5 checksum
+  uri:
+    url: "https://packages.couchbase.com/releases/{{ couchbase_version }}/couchbase-server-{{ couchbase_edition }}-{{ couchbase_version }}-centos7.x86_64.rpm.md5"
+    return_content: True
+  run_once: True
+  register: checksum
+
+- name: Download Couchbase Server
+  get_url:
+    url: "https://packages.couchbase.com/releases/{{ couchbase_version}}/couchbase-server-{{ couchbase_edition }}-{{ couchbase_version }}-centos7.x86_64.rpm"
+    dest: "{{ couchbase_executable }}"
+    checksum: md5:{{ checksum.content }}
+
+- name: Install Couchbase Server
+  yum: name={{ couchbase_executable }} state=present
+
+- name: Create Couchbase path
+  file:
+    path: "{{ couchbase_path }}"
+    state: directory
+    recurse: yes
+    owner: couchbase
+    group: couchbase
+    mode: 0770
+
+- name: Create Couchbase index path
+  file:
+    path: "{{ couchbase_index_path }}"
+    state: directory
+    recurse: yes
+    owner: couchbase
+    group: couchbase
+    mode: 0770
+
+- name: Add Couchbase profile.d script
+  copy: src=couchbase.sh dest=/etc/profile.d/couchbase.sh
+
+# curl -v
+#   -X POST http://[localhost]:8091/nodes/self/controller/settings
+#   -d path=[location] -d index_path=[location]
+- name: Initialize Couchbase nodes
+  uri:
+    url: "http://{{ inventory_hostname }}:{{ couchbase_port }}/nodes/self/controller/settings"
+    method: POST
+    body: "path={{ couchbase_path }}&index_path={{ couchbase_index_path }}"
+    status_code: 200
+    validate_certs: no
+
+- include: cluster.yml
