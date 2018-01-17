@@ -14,8 +14,14 @@
     body: "services={{ couchbase_services|join(',') }}&memoryQuota={{ couchbase_memory_quota }}&indexMemoryQuota={{ couchbase_index_memory_quota }}"
     status_code: 200
     validate_certs: False
+  when: inventory_hostname == couchbase_master
+
+- name: Wait for the leader to become active
+  wait_for:
+    delay: 5
+    port: "{{ couchbase_port }}"
   delegate_to: "{{ couchbase_master }}"
-  run_once: True
+  when: inventory_hostname != couchbase_master
 
 # curl -v -X POST http://[localhost]:8091/settings/web
 #   -d password=[password]
@@ -44,4 +50,4 @@
 
 - name: Rebalance cluster
   shell: "/opt/couchbase/bin/couchbase-cli rebalance -c {{ couchbase_master }}:{{ couchbase_port }} --user={{ couchbase_user }} --password={{ couchbase_password }}"
-  when: inventory_hostname == couchbase_master
+  when: inventory_hostname != couchbase_master
