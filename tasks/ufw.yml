@@ -1,0 +1,5 @@
+- name: Add Couchbase UFW application profile
+  copy: src=ufw-couchbase dest=/etc/ufw/applications.d/ufw-couchbase
+
+- name: Enable Couchbase UFW profile
+  ufw: rule={{couchbase_ufw_rule}} name=Couchbase

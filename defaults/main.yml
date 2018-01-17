@@ -6,4 +6,5 @@ couchbase_index_path: var/lib/couchbase/index
 couchbase_port: 8091
 couchbase_services:
     - kv
+couchbase_firewall_action: iptables
 couchbase_ufw_rule: allow

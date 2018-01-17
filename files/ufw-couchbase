@@ -1,0 +1,4 @@
+[Couchbase]
+title=Couchbase Server
+description=Couchbase Server
+ports=4369,9998,9999,11207,11214,11215/tcp|18091:18093/tcp|21100:21299/tcp|8091:8094/tcp|9100:9105/tcp|11209:11211/tcp

@@ -44,6 +44,16 @@
 - name: Add Couchbase profile.d script
   copy: src=couchbase.sh dest=/etc/profile.d/couchbase.sh
 
+- name: Add firewall rule profile
+  include: "{{ item }}"
+  with_first_found:
+    - "{{ couchbase_firewall_action }}.yml"
+    - iptables.yml
+
+- name: Wait for nodes to become active
+  pause:
+    seconds: 10
+
 # curl -v
 #   -X POST http://[localhost]:8091/nodes/self/controller/settings
 #   -d path=[location] -d index_path=[location]
